@@ -4,6 +4,7 @@ __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms
 
 import base64
 import datetime
+import hmac
 import logging
 import sys
 from typing import Optional, Union
@@ -190,7 +191,7 @@ def get_user_for_apikey(apikey: str) -> "Optional[octoprint.access.users.User]":
 
     user = None
 
-    if apikey == settings().get(["api", "key"]):
+    if hmac.compare_digest(apikey, settings().get(["api", "key"])):
         # global api key was used
         logging.getLogger(__name__).warning(
             "The global API key was just used. The global API key is deprecated and will cease to function with OctoPrint 1.13.0."
