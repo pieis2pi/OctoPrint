@@ -518,6 +518,14 @@ class AchievementsPlugin(
         self._reset_achievements(*data["achievements"])
         return NO_CONTENT
 
+    @octoprint.plugin.BlueprintPlugin.route("/reset/year", methods=["POST"])
+    @Permissions.PLUGIN_ACHIEVEMENTS_RESET.require(403)
+    def reset_year(self):
+        from octoprint.server import NO_CONTENT
+
+        self._reset_current_year_data()
+        return NO_CONTENT
+
     ##~~ AssetPlugin
 
     def get_assets(self):
@@ -558,7 +566,7 @@ class AchievementsPlugin(
             },
             {
                 "type": "settings",
-                "name": gettext("Achievements"),
+                "name": gettext("Achievements & Instance Stats"),
                 "template": "achievements_settings.jinja2",
                 "custom_bindings": True,
             },
