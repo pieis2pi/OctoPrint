@@ -131,6 +131,7 @@ EXTRA_REQUIRES = {
         "pytest-doctest-custom>=1.0.0,<2",
         "pytest>=8.3.4,<9 ; python_version>='3.8'",
         "pytest>=7.4.4,<8 ; python_version<'3.8'",
+        "time-machine",
         # formatting, liniting, etc
         "ruff",
         # pre-commit

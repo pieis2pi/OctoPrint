@@ -54,10 +54,10 @@ class AchievementsPlugin(
     def __init__(self):
         super().__init__()
         self._data = None
-        self._data_mutex = threading.Lock()
+        self._data_mutex = threading.RLock()
 
         self._year_data = None
-        self._year_data_mutex = threading.Lock()
+        self._year_data_mutex = threading.RLock()
 
         self._get_throttled = lambda: False
 
@@ -86,6 +86,20 @@ class AchievementsPlugin(
                         f"Cannot load timezone {timezone}, falling back to server timezone"
                     )
         return datetime.datetime.now(tz=self._tz)
+
+    @property
+    def _current_year(self) -> int:
+        return self._now().year
+
+    @property
+    def _current_year_stats(self) -> YearlyStats:
+        if not self._year_data:
+            self._load_current_year_file()
+
+        if self._year_data.year != self._current_year:
+            self._reset_current_year_data()
+
+        return self._year_data
 
     ##~~ Additional permissions hook
 
@@ -134,16 +148,16 @@ class AchievementsPlugin(
 
     def on_startup(self, *args, **kwargs):
         self._data.stats.server_starts += 1
-        self._year_data.server_starts += 1
+        self._current_year_stats.server_starts += 1
 
         version = get_octoprint_version()
         if self._data.stats.last_version != version.base_version:
             self._data.stats.seen_versions += 1
             self._data.stats.last_version = version.base_version
 
-        if self._year_data.last_version != version.base_version:
-            self._year_data.seen_versions += 1
-            self._year_data.last_version = version.base_version
+        if self._current_year_stats.last_version != version.base_version:
+            self._current_year_stats.seen_versions += 1
+            self._current_year_stats.last_version = version.base_version
 
         self._recheck_plugin_count()
 
@@ -172,7 +186,7 @@ class AchievementsPlugin(
         if event == Events.PRINT_STARTED:
             self._pause_counter = 0
             self._data.stats.prints_started += 1
-            self._year_data.prints_started += 1
+            self._current_year_stats.prints_started += 1
 
             ## specific dates
 
@@ -219,8 +233,9 @@ class AchievementsPlugin(
             self._data.stats.prints_started_per_weekday[now.weekday()] = (
                 self._data.stats.prints_started_per_weekday.get(now.weekday(), 0) + 1
             )
-            self._year_data.prints_started_per_weekday[now.weekday()] = (
-                self._year_data.prints_started_per_weekday.get(now.weekday(), 0) + 1
+            self._current_year_stats.prints_started_per_weekday[now.weekday()] = (
+                self._current_year_stats.prints_started_per_weekday.get(now.weekday(), 0)
+                + 1
             )
 
             ## other conditions
@@ -238,9 +253,9 @@ class AchievementsPlugin(
             self._data.stats.print_duration_total += payload["time"]
             self._data.stats.print_duration_finished += payload["time"]
 
-            self._year_data.prints_finished += 1
-            self._year_data.print_duration_total += payload["time"]
-            self._year_data.print_duration_finished += payload["time"]
+            self._current_year_stats.prints_finished += 1
+            self._current_year_stats.print_duration_total += payload["time"]
+            self._current_year_stats.print_duration_finished += payload["time"]
 
             self._data.state.consecutive_prints_cancelled_today = 0
 
@@ -248,9 +263,9 @@ class AchievementsPlugin(
                 self._data.stats.longest_print_duration = payload["time"]
                 self._data.stats.longest_print_date = int(self._now().timestamp())
 
-            if payload["time"] > self._year_data.longest_print_duration:
-                self._year_data.longest_print_duration = payload["time"]
-                self._year_data.longest_print_date = int(self._now().timestamp())
+            if payload["time"] > self._current_year_stats.longest_print_duration:
+                self._current_year_stats.longest_print_duration = payload["time"]
+                self._current_year_stats.longest_print_date = int(self._now().timestamp())
 
             self._trigger_achievement(Achievements.ONE_SMALL_STEP_FOR_MAN, write=False)
 
@@ -305,7 +320,7 @@ class AchievementsPlugin(
 
         elif event == Events.PRINT_FAILED or event == Events.PRINT_CANCELLED:
             self._data.stats.print_duration_total += payload["time"]
-            self._year_data.print_duration_total += payload["time"]
+            self._current_year_stats.print_duration_total += payload["time"]
 
             if Events.PRINT_CANCELLED:
                 self._trigger_achievement(
@@ -337,7 +352,7 @@ class AchievementsPlugin(
         elif event == Events.FILE_ADDED:
             if payload.get("operation") == "add":
                 self._data.stats.files_uploaded += 1
-                self._year_data.files_uploaded += 1
+                self._current_year_stats.files_uploaded += 1
 
                 if self._data.stats.files_uploaded >= 1000:
                     self._trigger_achievement(Achievements.THE_COLLECTOR_III)
@@ -357,7 +372,7 @@ class AchievementsPlugin(
         elif event == Events.FILE_REMOVED:
             if payload.get("operation") == "remove":
                 self._data.stats.files_deleted += 1
-                self._year_data.files_deleted += 1
+                self._current_year_stats.files_deleted += 1
 
                 if self._data.stats.files_deleted >= 1000:
                     self._trigger_achievement(Achievements.CLEAN_HOUSE_III)
@@ -387,7 +402,7 @@ class AchievementsPlugin(
                 self._trigger_achievement(Achievements.TINKERER)
 
             self._data.stats.plugins_installed += 1
-            self._year_data.plugins_installed += 1
+            self._current_year_stats.plugins_installed += 1
 
             self._recheck_plugin_count()
 
@@ -398,7 +413,7 @@ class AchievementsPlugin(
             and event == Events.PLUGIN_PLUGINMANAGER_UNINSTALL_PLUGIN
         ):
             self._data.stats.plugins_uninstalled += 1
-            self._year_data.plugins_uninstalled += 1
+            self._current_year_stats.plugins_uninstalled += 1
 
             changed = yearly_changed = True
 
@@ -449,7 +464,7 @@ class AchievementsPlugin(
                     if achievement.hidden and not self._has_achievement(achievement)
                 ]
             ),
-            current_year=self._year_data,
+            current_year=self._current_year_stats,
             available_years=self._available_years(),
             timezone=ApiTimezoneInfo(
                 name=timezone_name,
@@ -464,8 +479,8 @@ class AchievementsPlugin(
     def get_year_data(self, year):
         year_data = self._load_year_file(year=year)
         if year_data is None:
-            if year == self._now().year:
-                year_data = self._year_data
+            if year == self._current_year:
+                year_data = self._current_year_stats
             else:
                 abort(404)
 
@@ -560,8 +575,8 @@ class AchievementsPlugin(
         if len(self._plugin_manager.plugins) > self._data.stats.most_plugins:
             self._data.stats.most_plugins = len(self._plugin_manager.plugins)
 
-        if len(self._plugin_manager.plugins) > self._year_data.most_plugins:
-            self._year_data.most_plugins = len(self._plugin_manager.plugins)
+        if len(self._plugin_manager.plugins) > self._current_year_stats.most_plugins:
+            self._current_year_stats.most_plugins = len(self._plugin_manager.plugins)
 
         return changed, yearly_changed
 
@@ -576,7 +591,7 @@ class AchievementsPlugin(
         if write:
             self._write_data_file()
 
-        self._year_data.achievements += 1
+        self._current_year_stats.achievements += 1
         self._write_current_year_file()
 
         self._logger.info(f"New achievement unlocked: {achievement.name}!")
@@ -632,7 +647,7 @@ class AchievementsPlugin(
 
     def _year_path(self, year=None):
         if year is None:
-            year = self._now().year
+            year = self._current_year
         return os.path.join(self.get_plugin_data_folder(), f"{year}.json")
 
     def _available_years(self):
@@ -648,7 +663,7 @@ class AchievementsPlugin(
                 continue
 
         if not years:
-            years.append(self._now().year)
+            years.append(self._current_year)
         return years
 
     def _reset_data(self):
@@ -694,7 +709,8 @@ class AchievementsPlugin(
                 )
 
     def _reset_current_year_data(self):
-        self._year_data = YearlyStats()
+        self._year_data = YearlyStats(year=self._current_year)
+        self._write_current_year_file()
 
     def _load_current_year_file(self):
         with self._year_data_mutex:
@@ -713,12 +729,19 @@ class AchievementsPlugin(
                 f.write(
                     octoprint.util.to_bytes(
                         json.dumps(
-                            self._year_data.model_dump(), indent=2, separators=(",", ": ")
+                            self._year_data.model_dump(
+                                by_alias=True, exclude={"year": True}
+                            ),
+                            indent=2,
+                            separators=(",", ": "),
                         )
                     )
                 )
 
     def _load_year_file(self, year=None):
+        if year is None:
+            year = self._current_year
+
         path = self._year_path(year=year)
         if not os.path.exists(path):
             return None
@@ -728,7 +751,7 @@ class AchievementsPlugin(
                 self._logger.info(f"Loading data for {year} from {path}")
                 data = json.load(f)
 
-            return YearlyStats(**data)
+            return YearlyStats(year=year, **data)
         except Exception as e:
             self._logger.exception(f"Error loading data for year {year} from {path}: {e}")
             return None
