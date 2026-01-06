@@ -23,6 +23,24 @@ from octoprint.util.version import get_octoprint_version
 from .achievements import Achievement, Achievements
 from .data import Data, State, Stats, YearlyStats
 
+INCREASING_STATS = (
+    "seen_versions",
+    "server_starts",
+    "prints_started",
+    "prints_cancelled",
+    "prints_errored",
+    "prints_finished",
+    "print_duration_total",
+    "print_duration_cancelled",
+    "print_duration_errored",
+    "print_duration_finished",
+    "files_uploaded",
+    "files_deleted",
+    "plugins_installed",
+    "plugins_uninstalled",
+    "achievements",
+)  # this is provided here to allow for easier testing
+
 
 class ApiAchievement(Achievement):
     logo: str = ""
@@ -713,6 +731,8 @@ class AchievementsPlugin(
         self._write_current_year_file()
 
     def _load_current_year_file(self):
+        self._fix_current_year_data()  # try to fix data affected by #5223
+
         with self._year_data_mutex:
             self._year_data = self._load_year_file()
             if self._year_data is None:
@@ -722,23 +742,90 @@ class AchievementsPlugin(
                 self._reset_current_year_data()
 
     def _write_current_year_file(self):
+        self._write_year_file(self._year_data)
+
+    def _fix_current_year_data(self):
+        sentinel = os.path.join(self.get_plugin_data_folder(), ".issue_5223_handled")
+
+        # if our sentinel file exists, we can return, we've already done this
+        if os.path.exists(sentinel):
+            return
+
+        current_year = self._current_year
+        last_year = current_year - 1
+
         with self._year_data_mutex:
-            path = self._year_path()
-            self._logger.debug(f"Writing data to {path}")
-            with octoprint.util.atomic_write(path, mode="wb") as f:
-                f.write(
-                    octoprint.util.to_bytes(
-                        json.dumps(
-                            self._year_data.model_dump(
-                                by_alias=True, exclude={"year": True}
-                            ),
-                            indent=2,
-                            separators=(",", ": "),
-                        )
-                    )
+            # we don't have to do anything if current or last year's stats don't already exist
+            if not os.path.exists(
+                self._year_path(year=current_year)
+            ) or not os.path.exists(self._year_path(year=last_year)):
+                return
+
+            current_year_data = self._load_year_file(year=current_year)
+            last_year_data = self._load_year_file(year=last_year)
+
+            non_zero_keys = [
+                key for key in INCREASING_STATS if getattr(last_year_data, key) > 0
+            ]
+            non_zero_weekdays = [
+                key
+                for key, value in last_year_data.prints_started_per_weekday.items()
+                if value > 0
+            ]
+
+            all_stats_increased = all(
+                getattr(current_year_data, key) >= getattr(last_year_data, key)
+                for key in non_zero_keys
+            )
+            all_weekdays_increased = all(
+                current_year_data.prints_started_per_weekday.get(weekday, 0)
+                >= last_year_data.prints_started_per_weekday.get(weekday, 0)
+                for weekday in non_zero_weekdays
+            )
+
+            if all_stats_increased and all_weekdays_increased:
+                # we consider the stats of the current year a victim of #5223
+                # if all increasing stats of this year are >= last year's
+                for key in non_zero_keys:
+                    value = getattr(current_year_data, key) - getattr(last_year_data, key)
+                    setattr(current_year_data, key, value)
+
+                for weekday in non_zero_weekdays:
+                    value = current_year_data.prints_started_per_weekday.get(
+                        weekday, 0
+                    ) - last_year_data.prints_started_per_weekday.get(weekday, 0)
+                    current_year_data.prints_started_per_weekday[weekday] = value
+
+                current_year_data.last_version = ""
+                current_year_data.longest_print_duration = 0
+                current_year_data.longest_print_date = 0
+                current_year_data.most_plugins = 0
+
+                self._write_year_file(current_year_data, year=current_year)
+                self._logger.info(
+                    "Detected current yearly stats being affected by issue #5223, tried to fix stats"
                 )
 
-    def _load_year_file(self, year=None):
+            elif (
+                current_year_data.longest_print_date > 0
+                and current_year_data.longest_print_date
+                < datetime.datetime(current_year, 1, 1, tzinfo=self._tz).timestamp()
+            ):
+                # or if the longest logged print wasn't in this year - in this
+                # case however we'll sadly have to reset the full stats :/
+                self._write_year_file(YearlyStats(year=current_year), year=current_year)
+                self._logger.info(
+                    "Detected current yearly stats being affected by issue #5223, reset stats"
+                )
+
+            try:
+                open(sentinel, "a").close()
+            except Exception:
+                self._logger.exception(
+                    "Error while trying to create sentinel for bug #5223"
+                )
+
+    def _load_year_file(self, year=None) -> YearlyStats:
         if year is None:
             year = self._current_year
 
@@ -755,6 +842,24 @@ class AchievementsPlugin(
         except Exception as e:
             self._logger.exception(f"Error loading data for year {year} from {path}: {e}")
             return None
+
+    def _write_year_file(self, data: YearlyStats, year=None):
+        if year is None:
+            year = self._current_year
+
+        with self._year_data_mutex:
+            path = self._year_path(year=year)
+            self._logger.debug(f"Writing data to {path}")
+            with octoprint.util.atomic_write(path, mode="wb") as f:
+                f.write(
+                    octoprint.util.to_bytes(
+                        json.dumps(
+                            data.model_dump(by_alias=True, exclude={"year": True}),
+                            indent=2,
+                            separators=(",", ": "),
+                        )
+                    )
+                )
 
 
 def _register_custom_events(*args, **kwargs):
