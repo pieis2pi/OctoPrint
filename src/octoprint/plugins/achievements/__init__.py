@@ -804,10 +804,16 @@ class AchievementsPlugin(
                     ) - last_year_data.prints_started_per_weekday.get(weekday, 0)
                     current_year_data.prints_started_per_weekday[weekday] = value
 
-                current_year_data.last_version = ""
-                current_year_data.longest_print_duration = 0
-                current_year_data.longest_print_date = 0
-                current_year_data.most_plugins = 0
+                current_year_data.last_version = ""  # this gets immediately reset anyhow
+                current_year_data.most_plugins = 0  # this gets immediately reset anyhow
+
+                if (
+                    current_year_data.longest_print_date
+                    < datetime.datetime(current_year, 1, 1, tzinfo=self._tz).timestamp()
+                ):
+                    # reset longest print stats only if not from this year
+                    current_year_data.longest_print_duration = 0
+                    current_year_data.longest_print_date = 0
 
                 self._write_year_file(current_year_data, year=current_year)
                 self._logger.info(

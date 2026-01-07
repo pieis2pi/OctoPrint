@@ -121,6 +121,61 @@ def test_fix_5223_all_increasing(initialized_plugin, time_machine):
     )
 
 
+def test_fix_5223_all_increasing_but_current_longest_print(
+    initialized_plugin, time_machine
+):
+    # all stats increasing but longest print is from current year -> subtract and reset achievement, server starts and most plugins,
+    # longest print should stay
+    from octoprint.plugins.achievements.data import YearlyStats
+
+    time_machine.move_to(dt.datetime(2026, 1, 6))
+
+    stats_2025 = YearlyStats(year=2025, **STATS_2025)
+    initialized_plugin._write_year_file(stats_2025, year=2025)
+
+    stats_2026 = YearlyStats(year=2026, **STATS_2025)
+    stats_2026.server_starts += 1
+    stats_2026.longest_print_duration = 200
+    stats_2026.longest_print_date = dt.datetime(2026, 1, 3, 12, 23, 42).timestamp()
+    initialized_plugin._write_year_file(stats_2026, year=2026)
+
+    assert os.path.exists(os.path.join(initialized_plugin._data_folder, "2025.json"))
+    assert os.path.exists(os.path.join(initialized_plugin._data_folder, "2026.json"))
+
+    initialized_plugin._fix_current_year_data()
+
+    assert initialized_plugin._current_year_stats.server_starts == 1
+    assert all(
+        getattr(initialized_plugin._current_year_stats, key) == 0
+        for key in filter(
+            lambda x: x != "server_starts",
+            octoprint.plugins.achievements.INCREASING_STATS,
+        )
+    )
+    assert all(
+        initialized_plugin._current_year_stats.prints_started_per_weekday.get(weekday, 0)
+        == 0
+        for weekday in range(7)
+    )
+    assert (
+        initialized_plugin._current_year_stats.longest_print_date
+        == stats_2026.longest_print_date
+    )
+    assert (
+        initialized_plugin._current_year_stats.longest_print_duration
+        == stats_2026.longest_print_duration
+    )
+    assert initialized_plugin._current_year_stats.achievements == 0
+    assert initialized_plugin._current_year_stats.most_plugins == 0
+
+    assert os.path.exists(os.path.join(initialized_plugin._data_folder, "2025.json"))
+    assert os.path.exists(os.path.join(initialized_plugin._data_folder, "2026.json"))
+
+    assert os.path.exists(
+        os.path.join(initialized_plugin._data_folder, ".issue_5223_handled")
+    )
+
+
 def test_fix_5223_longest_print_mismatch(initialized_plugin, time_machine):
     # stats not all increasing, but longest print not in the current year -> full reset
     from octoprint.plugins.achievements.data import YearlyStats
