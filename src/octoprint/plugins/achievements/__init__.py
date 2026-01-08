@@ -15,6 +15,7 @@ import octoprint.plugin
 import octoprint.util
 from octoprint.access import ADMIN_GROUP, READONLY_GROUP, USER_GROUP
 from octoprint.access.permissions import Permissions
+from octoprint.access.users import LoginStatusListener
 from octoprint.events import Events
 from octoprint.schema import BaseModel
 from octoprint.util.version import get_octoprint_version
@@ -67,6 +68,7 @@ class AchievementsPlugin(
     octoprint.plugin.SettingsPlugin,
     octoprint.plugin.StartupPlugin,
     octoprint.plugin.TemplatePlugin,
+    LoginStatusListener,
 ):
     def __init__(self):
         super().__init__()
@@ -182,6 +184,11 @@ class AchievementsPlugin(
             Achievements.THE_WIZARD
         ) and not self._settings.get_boolean(["server", "firstRun"]):
             self._trigger_achievement(Achievements.THE_WIZARD, write=False)
+
+        if not self._has_achievement(Achievements.THE_MORE_THE_MERRIER):
+            self._recheck_user_count()
+            if not self._has_achievement(Achievements.THE_MORE_THE_MERRIER):
+                self._user_manager.register_login_status_listener(self)
 
         self._write_data_file()
         self._write_current_year_file()
@@ -582,6 +589,11 @@ class AchievementsPlugin(
             "server_timezone": server_timezone.tzname(),
         }
 
+    ##~~ LoginStatusListener
+
+    def on_user_added(self, user):
+        self._recheck_user_count()
+
     ##~~ External helpers
 
     def get_unlocked_achievements(self):
@@ -604,6 +616,11 @@ class AchievementsPlugin(
             self._current_year_stats.most_plugins = len(self._plugin_manager.plugins)
 
         return changed, yearly_changed
+
+    def _recheck_user_count(self):
+        user_count = len(self._user_manager.get_all_users())
+        if user_count > 1:
+            self._trigger_achievement(Achievements.THE_MORE_THE_MERRIER)
 
     def _has_achievement(self, achievement):
         return achievement.key in self._data.achievements
