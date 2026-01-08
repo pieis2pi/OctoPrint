@@ -12,7 +12,7 @@ class OnlyAdminsCheck(HealthCheck):
         non_admins = [
             user
             for user in users
-            if not user.has_permission(Permissions.ADMIN) and user.is_active()
+            if not user.has_permission(Permissions.ADMIN) and user.is_active
         ]
 
         return CheckResult(
