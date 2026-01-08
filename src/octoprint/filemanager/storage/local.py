@@ -11,7 +11,7 @@ import shutil
 import time
 import typing
 from contextlib import contextmanager
-from os import scandir, walk
+from os import listdir, scandir, walk
 
 import gcode_thumbnail_tool as gtt
 import psutil
@@ -407,12 +407,16 @@ class LocalFileStorage(StorageInterface):
         if not os.path.exists(folder_path):
             return
 
-        empty = True
-        for entry in scandir(folder_path):
-            if entry.name == ".metadata.json" or entry.name == ".metadata.yaml":
-                continue
-            empty = False
-            break
+        empty = (
+            len(
+                [
+                    x
+                    for x in listdir(folder_path)
+                    if x not in (".metadata.json", ".metadata.yaml")
+                ]
+            )
+            == 0
+        )
 
         if not empty and not recursive:
             raise StorageError(

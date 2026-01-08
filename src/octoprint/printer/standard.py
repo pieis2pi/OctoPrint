@@ -40,7 +40,6 @@ from octoprint.printer.job import PrintJob, UploadJob
 from octoprint.schema.config.controls import CustomControl, CustomControlContainer
 from octoprint.settings import settings
 from octoprint.util import InvariantContainer
-from octoprint.util import comm as comm
 from octoprint.util import get_fully_qualified_classname as fqcn
 
 

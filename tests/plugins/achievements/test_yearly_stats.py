@@ -136,7 +136,7 @@ def test_fix_5223_all_increasing_but_current_longest_print(
     stats_2026 = YearlyStats(year=2026, **STATS_2025)
     stats_2026.server_starts += 1
     stats_2026.longest_print_duration = 200
-    stats_2026.longest_print_date = dt.datetime(2026, 1, 3, 12, 23, 42).timestamp()
+    stats_2026.longest_print_date = int(dt.datetime(2026, 1, 3, 12, 23, 42).timestamp())
     initialized_plugin._write_year_file(stats_2026, year=2026)
 
     assert os.path.exists(os.path.join(initialized_plugin._data_folder, "2025.json"))
