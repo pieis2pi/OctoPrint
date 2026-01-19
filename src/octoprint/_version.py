@@ -62,8 +62,9 @@ next 1.11.0rc8 82247d9679259c50a6552eb4cedbe16e9c4f8476
 regression/.* 1.11.0rc8 82247d9679259c50a6552eb4cedbe16e9c4f8476
 
 # dev is ongoing work towards 1.12.0
-# so is wip/...
+# so are fix/... wip/...
 dev 1.12.0 ad3fdb9cb641b52db8e7f479d388c10317597c76
+fix/.* 1.12.0 ad3fdb9cb641b52db8e7f479d388c10317597c76
 wip/.* 1.12.0 ad3fdb9cb641b52db8e7f479d388c10317597c76
 """
 
