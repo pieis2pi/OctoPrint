@@ -44,9 +44,13 @@ $(function () {
         self.movingFileOrFolder = ko.observable(false);
         self.moveEntry = ko.observable({name: "", display: "", path: "", origin: ""}); // is there a better way to do this?
         self.moveSource = ko.observable(undefined);
-        self.moveDestination = ko.observable(undefined);
         self.moveSourceFilename = ko.observable(undefined);
+        self.moveSourceFilenameInternal = ko.observable(undefined);
+        self.moveDestination = ko.observable(undefined);
         self.moveDestinationFilename = ko.observable(undefined);
+        self.moveDestinationFilenameInternal = ko.observable(undefined);
+        self.moveDestinationExists = ko.observable(true);
+        self.moveDestinationFilenameSanitizer = undefined;
         self.moveDestinationFullpath = ko.pureComputed(function () {
             // Join the paths for renaming
             if (self.moveSourceFilename() !== self.moveDestinationFilename()) {
@@ -59,7 +63,41 @@ $(function () {
                 return self.moveDestination();
             }
         });
+
+        const performMoveDestinationSanitization = () => {
+            if (self.moveDestinationFilenameSanitizer) {
+                window.clearTimeout(self.moveDestinationFilenameSanitizer);
+                self.moveDestinationFilenameSanitizer = undefined;
+            }
+            self.moveDestinationFilenameSanitizer = window.setTimeout(() => {
+                OctoPrint.files
+                    .exists(
+                        self.currentStorage(),
+                        self.moveDestination(),
+                        self.moveDestinationFilename()
+                    )
+                    .done((resp) => {
+                        self.moveDestinationFilenameInternal(resp.sanitized_name);
+                        self.moveDestinationExists(resp.exists);
+                    });
+            }, 200);
+        };
+
+        self.moveDestinationFilename.subscribe(performMoveDestinationSanitization);
+        self.moveDestination.subscribe(performMoveDestinationSanitization);
+
         self.moveError = ko.observable("");
+        self.moveErrorText = ko.pureComputed(() => {
+            if (
+                self.moveDestinationExists() &&
+                self.moveDestinationFilenameInternal() !==
+                    self.moveSourceFilenameInternal()
+            ) {
+                return gettext("Destination already exists!");
+            } else {
+                return self.moveError();
+            }
+        });
         self.moveButtonText = ko.pureComputed(function () {
             if (self.moveSource() === self.moveDestination()) {
                 return gettext("Rename");
@@ -69,6 +107,16 @@ $(function () {
                     return gettext("Move & Rename");
                 } else return gettext("Move");
             }
+        });
+        self.moveButtonEnabled = ko.pureComputed(() => {
+            return (
+                (self.moveSource() !== self.moveDestination() ||
+                    self.moveSourceFilename() !== self.moveDestinationFilename()) &&
+                (!self.moveDestinationExists() ||
+                    self.moveSourceFilenameInternal() ===
+                        self.moveDestinationFilenameInternal()) &&
+                !self.movingFileOrFolder()
+            );
         });
 
         self.folderList = ko.pureComputed(() => {
@@ -914,9 +962,12 @@ $(function () {
             self.moveEntry(entry);
             self.moveError("");
             self.moveSource(current);
+            self.moveSourceFilename(entry.display);
+            self.moveSourceFilenameInternal(entry.name);
             self.moveDestination(current);
-            self.moveSourceFilename(entry.name);
-            self.moveDestinationFilename(entry.name);
+            self.moveDestinationFilename(entry.display);
+            self.moveDestinationFilenameInternal(entry.name);
+            self.moveDestinationExists(true);
             self.moveDialog.modal("show");
         };
 

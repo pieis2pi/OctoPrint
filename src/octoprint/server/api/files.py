@@ -276,49 +276,69 @@ def runFilesTest():
     if response is not None:
         return response
 
-    def sanitize(storage, path, filename):
+    def sanitize(storage: str, path: str, filename: str) -> tuple[str, str, str]:
         sanitized_path = fileManager.sanitize_path(storage, path)
         sanitized_name = fileManager.sanitize_name(storage, filename)
         joined = fileManager.join_path(storage, sanitized_path, sanitized_name)
         return sanitized_path, sanitized_name, joined
 
+    def run_sanitize(storage: str, path: str, name: str) -> dict:
+        sanitized_path, sanitized_name, sanitized = sanitize(
+            data["storage"], data["path"], data["filename"]
+        )
+        return {
+            "sanitized": sanitized,
+            "sanitized_path": sanitized_path,
+            "sanitized_name": sanitized_name,
+        }
+
+    def run_exists(storage: str, path: str, name: str) -> dict:
+        storage = data["storage"]
+        path = data["path"]
+        filename = data["filename"]
+
+        sanitized_path, sanitized_name, sanitized = sanitize(storage, path, filename)
+        result = {
+            "exists": False,
+            "sanitized": sanitized,
+            "sanitized_path": sanitized_path,
+            "sanitized_name": sanitized_name,
+        }
+
+        exists = _getFileDetails(storage, sanitized)
+        if exists:
+            suggestion = sanitized_name
+            name, ext = os.path.splitext(sanitized_name)
+            counter = 0
+            while fileManager.file_exists(
+                storage,
+                fileManager.join_path(
+                    storage,
+                    sanitized_path,
+                    suggestion,
+                ),
+            ):
+                counter += 1
+                suggestion = fileManager.sanitize_name(storage, f"{name}_{counter}{ext}")
+            result.update(
+                {
+                    "exists": True,
+                    "suggestion": suggestion,
+                    "size": exists.size,
+                    "date": exists.date,
+                }
+            )
+
+        return result
+
     try:
         if command == "sanitize":
-            _, _, sanitized = sanitize(data["storage"], data["path"], data["filename"])
-            return jsonify(sanitized=sanitized)
+            return jsonify(
+                **run_sanitize(data["storage"], data["path"], data["filename"])
+            )
 
         elif command == "exists":
-            storage = data["storage"]
-            path = data["path"]
-            filename = data["filename"]
-
-            sanitized_path, sanitized_name, sanitized = sanitize(storage, path, filename)
-
-            exists = _getFileDetails(storage, sanitized)
-            if exists:
-                suggestion = sanitized_name
-                name, ext = os.path.splitext(sanitized_name)
-                counter = 0
-                while fileManager.file_exists(
-                    storage,
-                    fileManager.join_path(
-                        storage,
-                        sanitized_path,
-                        suggestion,
-                    ),
-                ):
-                    counter += 1
-                    suggestion = fileManager.sanitize_name(
-                        storage, f"{name}_{counter}{ext}"
-                    )
-                return jsonify(
-                    exists=True,
-                    suggestion=suggestion,
-                    size=exists.size,
-                    date=exists.date,
-                )
-            else:
-                return jsonify(exists=False)
+            return jsonify(**run_exists(data["storage"], data["path"], data["filename"]))
 
     except octoprint.filemanager.NoSuchStorage:
         abort(400)
@@ -1250,6 +1270,7 @@ def gcodeFileCommand(storage, path):
                     abort(404)
 
                 _, name = fileManager.split_path(storage, path)
+                sanitized_source = fileManager.path_in_storage(storage, path)
 
                 destination = data["destination"]
                 dst_path, dst_name = fileManager.split_path(storage, destination)
@@ -1261,16 +1282,22 @@ def gcodeFileCommand(storage, path):
                 try:
                     if (
                         _verifyFolderExists(storage, destination)
-                        and sanitized_destination != path
+                        and sanitized_destination != sanitized_source
                     ):
                         # destination is an existing folder and not ourselves (= display rename), we'll assume we are supposed
                         # to move filename to this folder under the same name
                         destination = fileManager.join_path(storage, destination, name)
 
-                    if _verifyFileExists(storage, destination) or _verifyFolderExists(
-                        storage, destination
-                    ):
+                    if (
+                        _verifyFileExists(storage, destination)
+                        or _verifyFolderExists(storage, destination)
+                    ) and sanitized_destination != sanitized_source:
+                        # destination exists and is not the same item as source,
+                        # we don't support overwriting move/rename
                         abort(409, description="File or folder does already exist")
+
+                    # if we get here, internal source and destination might still be identical, but we might want to
+                    # do a display rename, which the storages should support...
 
                 except HTTPException:
                     raise
