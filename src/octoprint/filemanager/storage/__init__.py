@@ -452,23 +452,29 @@ class StorageInterface:
         """
         raise NotImplementedError()
 
-    def copy_file(self, source, destination) -> str:
+    def copy_file(
+        self, source: str, destination: str, allow_overwrite: bool = False
+    ) -> str:
         """
         Copies the file ``source`` to ``destination``
 
         :param string source: path to the source file
         :param string destination: path to destination
+        :param bool allow_overwrite: whether to allow overwriting an already existing destination file
 
         :return: the path in the storage to the copy of the file
         """
         raise NotImplementedError()
 
-    def move_file(self, source, destination) -> str:
+    def move_file(
+        self, source: str, destination: str, allow_overwrite: bool = False
+    ) -> str:
         """
         Moves the file ``source`` to ``destination``
 
         :param string source: path to the source file
         :param string destination: path to destination
+        :param bool allow_overwrite: whether to allow overwriting an already existing destination file
 
         :return: the new path in the storage to the file
         """

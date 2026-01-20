@@ -431,7 +431,9 @@ class LocalFileStorage(StorageInterface):
 
         self._remove_metadata_entry(path, name)
 
-    def _get_source_destination_data(self, source, destination, must_not_equal=False):
+    def _get_source_destination_data(
+        self, source, destination, must_not_equal=False, allow_overwrite: bool = False
+    ):
         """Prepares data dicts about source and destination for copy/move."""
         source_path, source_name = self.sanitize(source)
 
@@ -458,6 +460,7 @@ class LocalFileStorage(StorageInterface):
         if (
             os.path.exists(destination_fullpath)
             and source_fullpath != destination_fullpath
+            and not allow_overwrite
         ):
             raise StorageError(
                 f"{destination_name} does already exist in {destination_path}",
@@ -520,9 +523,9 @@ class LocalFileStorage(StorageInterface):
                 destination_data["path"], destination_data["name"], destination_meta
             )
 
-    def copy_folder(self, source, destination):
+    def copy_folder(self, source, destination, allow_overwrite: bool = False):
         source_data, destination_data = self._get_source_destination_data(
-            source, destination, must_not_equal=True
+            source, destination, must_not_equal=True, allow_overwrite=allow_overwrite
         )
 
         try:
@@ -544,9 +547,9 @@ class LocalFileStorage(StorageInterface):
 
         return self.path_in_storage(destination_data["fullpath"])
 
-    def move_folder(self, source, destination):
+    def move_folder(self, source, destination, allow_overwrite: bool = False):
         source_data, destination_data = self._get_source_destination_data(
-            source, destination
+            source, destination, allow_overwrite=allow_overwrite
         )
 
         # only a display rename? Update that and bail early
@@ -681,9 +684,9 @@ class LocalFileStorage(StorageInterface):
         self._remove_metadata_entry(path, name)
         self._remove_thumbnails(path, name)
 
-    def copy_file(self, source, destination):
+    def copy_file(self, source, destination, allow_overwrite: bool = False):
         source_data, destination_data = self._get_source_destination_data(
-            source, destination, must_not_equal=True
+            source, destination, must_not_equal=True, allow_overwrite=allow_overwrite
         )
 
         if not octoprint.filemanager.valid_file_type(destination_data["name"]):
@@ -724,9 +727,9 @@ class LocalFileStorage(StorageInterface):
 
         return self.path_in_storage(destination_data["fullpath"])
 
-    def move_file(self, source, destination, allow_overwrite=False):
+    def move_file(self, source, destination, allow_overwrite: bool = False):
         source_data, destination_data = self._get_source_destination_data(
-            source, destination
+            source, destination, allow_overwrite=allow_overwrite
         )
 
         if not octoprint.filemanager.valid_file_type(destination_data["name"]):

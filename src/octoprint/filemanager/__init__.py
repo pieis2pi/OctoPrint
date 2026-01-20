@@ -893,17 +893,23 @@ class FileManager:
             Events.UPDATED_FILES, {"type": "printables", "storage": location}
         )
 
-    def copy_file(self, storage, source, destination):
+    def copy_file(self, storage, source, destination, allow_overwrite=False):
         if not self._storage(storage).capabilities.copy_file:
             raise StorageError(
                 f"File copy on {storage} is not supported", code=StorageError.UNSUPPORTED
             )
 
-        path_in_storage = self._storage(storage).copy_file(source, destination)
-        if not self.has_analysis(storage, path_in_storage):
-            queue_entry = self._analysis_queue_entry(storage, path_in_storage)
-            if queue_entry:
-                self._analysis_queue.enqueue(queue_entry)
+        try:
+            path_in_storage = self._storage(storage).copy_file(
+                source, destination, allow_overwrite=allow_overwrite
+            )
+        except Exception:
+            raise
+        finally:
+            if not self.has_analysis(storage, path_in_storage):
+                queue_entry = self._analysis_queue_entry(storage, path_in_storage)
+                if queue_entry:
+                    self._analysis_queue.enqueue(queue_entry)
 
         _, name = self._storage(storage).split_path(path_in_storage)
         eventManager().fire(
@@ -920,17 +926,23 @@ class FileManager:
             Events.UPDATED_FILES, {"type": "printables", "storage": storage}
         )
 
-    def move_file(self, storage, source, destination):
+    def move_file(self, storage, source, destination, allow_overwrite=False):
         source_in_storage = self._storage(storage).path_in_storage(source)
         destination_in_storage = self._storage(storage).path_in_storage(destination)
 
         queue_entry = self._analysis_queue_entry(storage, source_in_storage)
         self._analysis_queue.dequeue(queue_entry)
-        path = self._storage(storage).move_file(source_in_storage, destination_in_storage)
-        if not self.has_analysis(storage, path):
-            queue_entry = self._analysis_queue_entry(storage, path)
-            if queue_entry:
-                self._analysis_queue.enqueue(queue_entry)
+        try:
+            path = self._storage(storage).move_file(
+                source_in_storage, destination_in_storage, allow_overwrite=allow_overwrite
+            )
+        except Exception:
+            raise
+        finally:
+            if not self.has_analysis(storage, path):
+                queue_entry = self._analysis_queue_entry(storage, path)
+                if queue_entry:
+                    self._analysis_queue.enqueue(queue_entry)
 
         _, source_name = self._storage(storage).split_path(source_in_storage)
         _, destination_name = self._storage(storage).split_path(destination_in_storage)
@@ -1007,8 +1019,10 @@ class FileManager:
             Events.UPDATED_FILES, {"type": "printables", "storage": storage}
         )
 
-    def copy_folder(self, storage, source, destination):
-        path_in_storage = self._storage(storage).copy_folder(source, destination)
+    def copy_folder(self, storage, source, destination, allow_overwrite=False):
+        path_in_storage = self._storage(storage).copy_folder(
+            source, destination, allow_overwrite=allow_overwrite
+        )
         self._determine_analysis_backlog(
             storage, self._storage(storage), root=path_in_storage
         )
@@ -1022,19 +1036,23 @@ class FileManager:
             Events.UPDATED_FILES, {"type": "printables", "storage": storage}
         )
 
-    def move_folder(self, storage, source, destination):
+    def move_folder(self, storage, source, destination, allow_overwrite=False):
         source_in_storage = self._storage(storage).path_in_storage(source)
         destination_in_storage = self._storage(storage).path_in_storage(destination)
 
         self._analysis_queue.dequeue_folder(storage, source_in_storage)
         self._analysis_queue.pause()
-        destination_in_storage = self._storage(storage).move_folder(
-            source_in_storage, destination_in_storage
-        )
-        self._determine_analysis_backlog(
-            storage, self._storage(storage), root=destination_in_storage
-        )
-        self._analysis_queue.resume()
+        try:
+            destination_in_storage = self._storage(storage).move_folder(
+                source_in_storage, destination_in_storage, allow_overwrite=allow_overwrite
+            )
+        except Exception:
+            raise
+        finally:
+            self._determine_analysis_backlog(
+                storage, self._storage(storage), root=destination_in_storage
+            )
+            self._analysis_queue.resume()
 
         _, source_name = self._storage(storage).split_path(source_in_storage)
         _, destination_name = self._storage(storage).split_path(destination_in_storage)

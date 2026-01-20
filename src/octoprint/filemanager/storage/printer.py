@@ -293,10 +293,18 @@ class PrinterFileStorage(StorageInterface):
         except PrinterFilesError as exc:
             raise StorageError("Folder deletion failed") from exc
 
-    def copy_folder(self, source, destination) -> str:
+    def copy_folder(self, source, destination, allow_overwrite: bool = False) -> str:
         if not self.capabilities.copy_folder:
             raise StorageError(
                 "Printer does not support folder copies", code=StorageError.UNSUPPORTED
+            )
+
+        if not allow_overwrite and (
+            self.file_exists(destination) or self.folder_exists(destination)
+        ):
+            raise StorageError(
+                f"{destination} does already exist",
+                code=StorageError.ALREADY_EXISTS,
             )
 
         try:
@@ -306,10 +314,18 @@ class PrinterFileStorage(StorageInterface):
         except PrinterFilesError as exc:
             raise StorageError("Folder copy failed") from exc
 
-    def move_folder(self, source, destination):
+    def move_folder(self, source, destination, allow_overwrite: bool = False):
         if not self.capabilities.move_folder:
             raise StorageError(
                 "Printer does not support folder moves", code=StorageError.UNSUPPORTED
+            )
+
+        if not allow_overwrite and (
+            self.file_exists(destination) or self.folder_exists(destination)
+        ):
+            raise StorageError(
+                f"{destination} does already exist",
+                code=StorageError.ALREADY_EXISTS,
             )
 
         try:
@@ -383,10 +399,18 @@ class PrinterFileStorage(StorageInterface):
         except PrinterFilesError as exc:
             raise StorageError("File deletion failed") from exc
 
-    def copy_file(self, source, destination):
+    def copy_file(self, source, destination, allow_overwrite: bool = False):
         if not self.capabilities.copy_file:
             raise StorageError(
                 "Printer does not support file copies", code=StorageError.UNSUPPORTED
+            )
+
+        if not allow_overwrite and (
+            self.file_exists(destination) or self.folder_exists(destination)
+        ):
+            raise StorageError(
+                f"{destination} does already exist",
+                code=StorageError.ALREADY_EXISTS,
             )
 
         try:
@@ -396,10 +420,18 @@ class PrinterFileStorage(StorageInterface):
         except PrinterFilesError as exc:
             raise StorageError("File copy failed") from exc
 
-    def move_file(self, source, destination):
+    def move_file(self, source, destination, allow_overwrite: bool = False):
         if not self.capabilities.move_file:
             raise StorageError(
                 "Printer does not support file moves", code=StorageError.UNSUPPORTED
+            )
+
+        if not allow_overwrite and (
+            self.file_exists(destination) or self.folder_exists(destination)
+        ):
+            raise StorageError(
+                f"{destination} does already exist",
+                code=StorageError.ALREADY_EXISTS,
             )
 
         try:
