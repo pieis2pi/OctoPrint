@@ -75,6 +75,10 @@ def get_systeminfo_bundle(systeminfo, logbase, printer=None, plugin_manager=None
         z = ZipStream(sized=True)
 
     if printer and printer.is_operational():
+        connection = printer.current_connection
+        if connection:
+            systeminfo["printer.connector"] = connection.connector
+
         firmware_info = printer.firmware_info
         if firmware_info:
             # add firmware name to systeminfo so it's included in systeminfo.txt
@@ -83,7 +87,12 @@ def get_systeminfo_bundle(systeminfo, logbase, printer=None, plugin_manager=None
             firmware_data = firmware_info.get("data")
             if firmware_data and isinstance(firmware_data, dict):
                 z.add(
-                    to_bytes("\n".join([f"{k}:{v}" for k, v in firmware_data.items()])),
+                    to_bytes(
+                        "\n".join(
+                            [firmware_info["name"]]
+                            + [f"{k}:{v}" for k, v in firmware_data.items()]
+                        )
+                    ),
                     arcname="firmware.txt",
                 )
 
