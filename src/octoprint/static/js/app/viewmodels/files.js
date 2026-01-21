@@ -70,6 +70,12 @@ $(function () {
                 self.moveDestinationFilenameSanitizer = undefined;
             }
             self.moveDestinationFilenameSanitizer = window.setTimeout(() => {
+                const storage = self.currentStorage();
+                const destinationPath = self.moveDestination();
+                const destinationName = self.moveDestinationFilename();
+
+                if (!storage || !destinationPath || !destinationName) return;
+
                 OctoPrint.files
                     .exists(
                         self.currentStorage(),
