@@ -25,12 +25,18 @@
 <div class="row-fluid">
     <a href="#"
        class="btn btn-danger span6"
-       data-bind="click: function() { if(!setup() || decision()){disablePluginBlacklist()}}, enable: !setup() || decision(), css: {disabled: setup() && !decision()}">
+       data-bind="click: function() { if((!setup() || decision()) && !active()){disablePluginBlacklist()}}, enable: (!setup() || decision()) && !active(), css: {disabled: (setup() && !decision()) || active()}">
+        <i class="fas fa-spinner fa-spin"
+           style="display: none"
+           data-bind="visible: active() && decision() !== true"></i>
         {{ _("Disable Plugin Blocklist Processing") }}
     </a>
     <a href="#"
        class="btn btn-primary span6"
-       data-bind="click: function() { if(!setup() || !decision()){enablePluginBlacklist()}}, enable: !setup() || !decision(), css: {disabled: setup() && decision()}">
+       data-bind="click: function() { if((!setup() || !decision()) && !active()){enablePluginBlacklist()}}, enable: (!setup() || !decision()) && !active(), css: {disabled: (setup() && decision()) || active()}">
+        <i class="fas fa-spinner fa-spin"
+           style="display: none"
+           data-bind="visible: active() && decision() === true"></i>
         {{ _("Enable Plugin Blocklist Processing") }}
     </a>
 </div>
