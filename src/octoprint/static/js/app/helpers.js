@@ -753,7 +753,7 @@ function showMessageDialog(msg, options) {
     }
 
     const title = options.title || "";
-    const message = options.message || "";
+    let message = options.message || "";
     const close = options.close || gettext("Close");
     const onclose = options.onclose || undefined;
     const onshow = options.onshow || undefined;
