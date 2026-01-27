@@ -2,6 +2,7 @@ __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agp
 __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
 
 import hashlib
+import hmac
 import logging
 import os
 import secrets
@@ -949,7 +950,9 @@ class FilebasedUserManager(UserManager):
 
         elif apikey is not None:
             for user in self._users.values():
-                if apikey == user._apikey:
+                if user._apikey is None:
+                    continue
+                if hmac.compare_digest(apikey, user._apikey):
                     return user
             return None
 
