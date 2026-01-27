@@ -930,6 +930,8 @@ class FilebasedUserManager(UserManager):
 
         elif apikey is not None:
             for user in self._users.values():
+                if user._apikey is None:
+                    continue
                 if hmac.compare_digest(apikey, user._apikey):
                     return user
             return None

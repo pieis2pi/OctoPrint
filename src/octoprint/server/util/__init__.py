@@ -191,7 +191,9 @@ def get_user_for_apikey(apikey: str) -> "Optional[octoprint.access.users.User]":
 
     user = None
 
-    if hmac.compare_digest(apikey, settings().get(["api", "key"])):
+    global_apikey = settings().get(["api", "key"])
+
+    if global_apikey is not None and hmac.compare_digest(apikey, global_apikey):
         # global api key was used
         logging.getLogger(__name__).warning(
             "The global API key was just used. The global API key is deprecated and will cease to function with OctoPrint 1.13.0."
