@@ -3,9 +3,9 @@
 # This file is distributed under the same license as the OctoPrint project.
 msgid ""
 msgstr ""
-"Project-Id-Version: OctoPrint 1.11.5\n"
+"Project-Id-Version: OctoPrint 1.11.6\n"
 "Report-Msgid-Bugs-To: i18n@octoprint.org\n"
-"POT-Creation-Date: 2025-12-01 12:05+0100\n"
+"POT-Creation-Date: 2026-01-27 10:43+0100\n"
 "PO-Revision-Date: 2025-12-01 12:05+0100\n"
 "Last-Translator: Gina Häußge <gina@octoprint.org>\n"
 "Language: de\n"
@@ -153,28 +153,31 @@ msgstr ""
 msgid "Allows to manage settings and also to read sensitive settings"
 msgstr "Erlaubt vollen Zugriff auf alle Einstellungen"
 
-#: src/octoprint/plugins/achievements/__init__.py:97
+#: src/octoprint/plugins/achievements/__init__.py:129
 msgid "Allows to view the instance achievements & stats."
 msgstr ""
 "Erlaubt die Anzeige der Achievements & Instanz-Statistiken und "
 "Achievements."
 
-#: src/octoprint/plugins/achievements/__init__.py:106
+#: src/octoprint/plugins/achievements/__init__.py:138
 msgid "Allows to reset the instance achievements & stats."
 msgstr "Erlaubt das Zurücksetzen der Achievements & Instanz-Statistiken."
 
-#: src/octoprint/plugins/achievements/__init__.py:516
-#: src/octoprint/plugins/achievements/__init__.py:528
+#: src/octoprint/plugins/achievements/__init__.py:557
 #: src/octoprint/plugins/achievements/templates/achievements_about_achievements.jinja2:3
 #: src/octoprint/templates/footer.jinja2:10
 msgid "Achievements"
 msgstr "Achievements"
 
-#: src/octoprint/plugins/achievements/__init__.py:522
+#: src/octoprint/plugins/achievements/__init__.py:563
 msgid "Instance Stats"
 msgstr "Instanz-Statistiken"
 
-#: src/octoprint/plugins/achievements/__init__.py:744
+#: src/octoprint/plugins/achievements/__init__.py:569
+msgid "Achievements & Instance Stats"
+msgstr "Achievements & Instanz-Statistiken"
+
+#: src/octoprint/plugins/achievements/__init__.py:886
 msgid ""
 "Without this plugin you will no longer be able to earn achievements and "
 "track stats about your OctoPrint instance."
@@ -182,48 +185,54 @@ msgstr ""
 "Ohne dieses Plugin kannst du deine keine Achievements mehr freischalten "
 "und keine Statistiken deiner OctoPrint Instanz erhalten."
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:56
+#: src/octoprint/plugins/achievements/static/js/achievements.js:68
 msgid "No prints yet"
 msgstr "Keine Drucke bisher"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:58
+#: src/octoprint/plugins/achievements/static/js/achievements.js:70
 #, python-format
 msgid "%(prints)s (%(finished)s finished)"
 msgstr "%(prints)s (%(finished)s beendet)"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:69
+#: src/octoprint/plugins/achievements/static/js/achievements.js:92
 #, python-format
 msgid "%(total)s"
 msgstr "%(total)s"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:73
+#: src/octoprint/plugins/achievements/static/js/achievements.js:96
 #, python-format
 msgid "%(total)s (%(finished)s finished)"
 msgstr "%(total)s (%(finished)s beendet)"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:86
+#: src/octoprint/plugins/achievements/static/js/achievements.js:121
 #, python-format
 msgid "%(duration)s (finished on %(date)s, %(timeSince)s)"
 msgstr "%(duration)s (beendet am %(date)s, %(timeSince)s)"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:96
+#: src/octoprint/plugins/achievements/static/js/achievements.js:131
 #, python-format
 msgid "... and %(count)s hidden achievements!"
 msgstr "... und %(count)s versteckte Achievements!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:115
+#: src/octoprint/plugins/achievements/static/js/achievements.js:150
 msgid "This will reset all achievements. This action cannot be undone!"
 msgstr ""
 "Dies wird alle Achievements zurücksetzen. Diese Aktion kann nicht "
 "rückgängig gemacht werden!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:182
+#: src/octoprint/plugins/achievements/static/js/achievements.js:217
 msgid "This will reset all time based achievements. This action cannot be undone!"
 msgstr ""
 "Dies wird alle Zeit-basierten Achievements zurücksetzen. Diese Aktion "
 "kann nicht rückgängig gemacht werden!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:232
+#: src/octoprint/plugins/achievements/static/js/achievements.js:234
+msgid "This will reset this year's stats. This action cannot be undone!"
+msgstr ""
+"Das wird die Statistiken dieses Jahres zurücksetzen. Diese Aktion kann nicht "
+"rückgängig gemacht werden!"
+
+#: src/octoprint/plugins/achievements/static/js/achievements.js:304
 #, python-format
 msgid ""
 "Enjoying OctoPrint? Looks like it! <a href=\"%(url)s\" target=\"_blank\" "
@@ -234,7 +243,7 @@ msgstr ""
 "target=\"_blank\" rel=\"noopener noreferer\">Dann könnte es Zeit sein, "
 "etwas zurückzugeben</a> - Danke!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:235
+#: src/octoprint/plugins/achievements/static/js/achievements.js:307
 #, python-format
 msgid ""
 "Getting value from OctoPrint? <a href=\"%(url)s\" target=\"_blank\" "
@@ -245,7 +254,7 @@ msgstr ""
 "target=\"_blank\" rel=\"noopener noreferer\">Dann denke bitte über eine "
 "Spende an seine Vollzeit-Entwicklerin nach</a> - Danke!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:238
+#: src/octoprint/plugins/achievements/static/js/achievements.js:310
 #, python-format
 msgid ""
 "Has OctoPrint helped you enjoy your printer more? <a href=\"%(url)s\" "
@@ -256,23 +265,23 @@ msgstr ""
 "href=\"%(url)s\" target=\"_blank\" rel=\"noopener noreferer\">Dann denke "
 "bitte über eine Unterstützung der weiteren Entwicklung nach</a> - Danke!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:250
+#: src/octoprint/plugins/achievements/static/js/achievements.js:322
 msgid "Configure timezone..."
 msgstr "Zeitzone konfigurieren..."
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:268
+#: src/octoprint/plugins/achievements/static/js/achievements.js:340
 msgid "Show all achievements..."
 msgstr "Zeige alle Achievements an..."
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:272
+#: src/octoprint/plugins/achievements/static/js/achievements.js:344
 msgid "Achievement unlocked!"
 msgstr "Achievement freigeschaltet!"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:344
+#: src/octoprint/plugins/achievements/static/js/achievements.js:416
 msgid "Reset time based achievements?"
 msgstr "Zeit-basierte Achievements zurück setzen?"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:345
+#: src/octoprint/plugins/achievements/static/js/achievements.js:417
 msgid ""
 "You have changed the timezone setting. Do you want to reset all time "
 "based achievements?"
@@ -280,17 +289,17 @@ msgstr ""
 "Du hast die Zeitzone geändert. Möchtest du alle Zeit-basierten "
 "Achievements zurücksetzen?"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:348
+#: src/octoprint/plugins/achievements/static/js/achievements.js:420
 msgid "Do you want to reset all time based achievements?"
 msgstr "Möchtest du alle Zeit-basierten Achievements zurücksetzen?"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:351
+#: src/octoprint/plugins/achievements/static/js/achievements.js:423
 #: src/octoprint/static/js/app/viewmodels/files.js:759
 #: src/octoprint/static/js/app/viewmodels/printerstate.js:511
 msgid "Yes"
 msgstr "Ja"
 
-#: src/octoprint/plugins/achievements/static/js/achievements.js:352
+#: src/octoprint/plugins/achievements/static/js/achievements.js:424
 #: src/octoprint/static/js/app/viewmodels/files.js:758
 #: src/octoprint/static/js/app/viewmodels/printerstate.js:510
 msgid "No"
@@ -321,33 +330,57 @@ msgstr "Freigeschaltet:"
 msgid "Instance stats"
 msgstr "Instanz-Statistiken"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:6
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:5
+#: src/octoprint/templates/sidebar/files.jinja2:61
+msgid "Total"
+msgstr "Gesamt"
+
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:8
 msgid "Collecting since"
 msgstr "Sammlung seit"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:9
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:11
 msgid "Collection started on"
 msgstr "Die Sammlung begann am"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:12
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:14
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:42
 msgid "Versions seen"
 msgstr "Geloggte Versionen"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:15
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:17
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:45
 msgid "Number of server starts"
 msgstr "Anzahl der Serverstarts"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:18
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:20
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:48
 msgid "Prints"
 msgstr "Drucke"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:21
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:23
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:51
 msgid "Total print duration"
 msgstr "Gesamtdruckdauer"
 
-#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:24
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:26
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:54
 msgid "Longest print"
 msgstr "Längster Druck"
+
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:29
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:57
+msgid "Files uploaded"
+msgstr "Hochgeladene Dateien"
+
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:32
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:60
+msgid "Plugins installed"
+msgstr "Installierte Plugins"
+
+#: src/octoprint/plugins/achievements/templates/achievements_about_stats.jinja2:39
+msgid "This year so far"
+msgstr "Dieses Jahr soweit"
 
 #: src/octoprint/plugins/achievements/templates/achievements_settings.jinja2:1
 msgid "Achievements Settings"
@@ -389,6 +422,18 @@ msgstr ""
 #: src/octoprint/plugins/achievements/templates/achievements_settings.jinja2:29
 msgid "Reset all achievements"
 msgstr "Setze alle Achievements zurück"
+
+#: src/octoprint/plugins/achievements/templates/achievements_settings.jinja2:34
+msgid "Instance Stats Settings"
+msgstr "Einstellungen für Instanz-Statistiken"
+
+#: src/octoprint/plugins/achievements/templates/achievements_settings.jinja2:36
+msgid "Reset stats of current year"
+msgstr "Statistiken des aktuellen Jahres zurücksetzen"
+
+#: src/octoprint/plugins/achievements/templates/achievements_settings.jinja2:41
+msgid "Reset the stats of the current year"
+msgstr "Setzt die Statistiken des aktuellen Jahres zurück"
 
 #: src/octoprint/plugins/action_command_notification/__init__.py:34
 msgid "Allows to see printer notifications"
@@ -705,20 +750,20 @@ msgstr "Aktionen"
 msgid "Refresh Announcements"
 msgstr "Ankündigungen aktualisieren"
 
-#: src/octoprint/plugins/appkeys/__init__.py:137
+#: src/octoprint/plugins/appkeys/__init__.py:138
 msgid "Allows administrating all application keys"
 msgstr "Erlaubt die Administration aller Applicationkeys"
 
-#: src/octoprint/plugins/appkeys/__init__.py:145
+#: src/octoprint/plugins/appkeys/__init__.py:146
 msgid "Allows to grant app access"
 msgstr "Erlaubt Zugriffsgewährung für Apps"
 
-#: src/octoprint/plugins/appkeys/__init__.py:155
 #: src/octoprint/plugins/appkeys/__init__.py:156
+#: src/octoprint/plugins/appkeys/__init__.py:157
 msgid "Application Keys"
 msgstr "Application Keys"
 
-#: src/octoprint/plugins/appkeys/__init__.py:280
+#: src/octoprint/plugins/appkeys/__init__.py:281
 #: src/octoprint/plugins/appkeys/static/js/appkeys.js:149
 #, fuzzy, python-format
 msgid ""
@@ -730,7 +775,7 @@ msgstr ""
 "identifiziert, möchte Zugriff auf OctoPrint über die API haben. Die "
 "Anfrage hierzu kommt von <code>%(remote_address)s</code>."
 
-#: src/octoprint/plugins/appkeys/__init__.py:695
+#: src/octoprint/plugins/appkeys/__init__.py:696
 msgid ""
 "Without this plugin third party clients will no longer be able to obtain "
 "an API key without you manually copy-pasting it."
@@ -1118,7 +1163,7 @@ msgstr "Lösche %(count)d Sicherungen..."
 
 #: src/octoprint/plugins/backup/static/js/backup.js:368
 #: src/octoprint/plugins/logging/static/js/logging.js:372
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:772
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:857
 #: src/octoprint/static/js/app/viewmodels/timelapse.js:518
 #: src/octoprint/static/js/app/viewmodels/timelapse.js:550
 #, python-format
@@ -1127,7 +1172,7 @@ msgstr "%(filename)s gelöscht..."
 
 #: src/octoprint/plugins/backup/static/js/backup.js:376
 #: src/octoprint/plugins/logging/static/js/logging.js:380
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:773
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:858
 #: src/octoprint/static/js/app/viewmodels/timelapse.js:526
 #: src/octoprint/static/js/app/viewmodels/timelapse.js:559
 #, python-format
@@ -1136,7 +1181,7 @@ msgstr "Löschen von %(filename)s fehlgeschlagen, fahre fort..."
 
 #: src/octoprint/plugins/backup/static/js/backup.js:380
 #: src/octoprint/plugins/logging/static/js/logging.js:384
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:774
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:859
 #: src/octoprint/static/js/app/viewmodels/timelapse.js:530
 #, python-format
 msgid "Deletion of %(filename)s failed: %(error)s"
@@ -5598,116 +5643,116 @@ msgstr ""
 "target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy auf  "
 "tracking.octoprint.org</a>.\n"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:265
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:305
 #, python-format
 msgid "%(count)d selected"
 msgstr "%(count)d ausgewählt"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:275
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:315
 #, python-format
 msgid "Size: %(size)s"
 msgstr "Größe: %(size)s"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:565
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:650
 msgid "Create a new folder"
 msgstr "Neues Verzeichnis erstellen"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:566
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:651
 msgid "Please specify the name:"
 msgstr "Bitte gib den Namen ein:"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:573
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:616
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:658
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:701
 msgid "This name is already in use!"
 msgstr "Dieser Name wird bereits verwendet!"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:581
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:632
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:863
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:666
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:717
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:948
 msgid "Operation failed"
 msgstr "Prozess fehlgeschlagen"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:583
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:668
 #, python-format
 msgid "Creating new folder %(filename)s failed: %(error)s"
 msgstr "Erstellen von Verzeichnis %(filename)s fehlgeschlagen: %(error)s"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:606
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:691
 #, python-format
 msgid "Rename %(name)s"
 msgstr "%(name)s umbenennen"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:607
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:692
 msgid "Please specify the new name:"
 msgstr "Bitte definiere den neuen Namen:"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:634
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:719
 #, python-format
 msgid "Renaming %(filename)s failed: %(error)s"
 msgstr "Umbenennung von %(filename)s fehlgeschlagen: %(error)s"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:658
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:743
 msgid "Select destination for copy"
 msgstr "Wähle das Zielverzeichnis für die Kopie"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:660
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:745
 msgid "Select destination for move"
 msgstr "Wähle das Zielverzeichnis für das Verschieben"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:702
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:787
 msgid "Copying"
 msgstr "Kopiere"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:703
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:788
 #, python-format
 msgid "Copying %%(count)d items to %(destination)s..."
 msgstr "Kopiere %%(count)d Objekte nach %(destination)s..."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:706
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:791
 #, python-format
 msgid "Copied %(filename)s..."
 msgstr "%(filename)s kopiert..."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:707
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:792
 #, python-format
 msgid "Copying %(filename)s failed, continuing..."
 msgstr "Kopieren von %(filename)s fehlgeschlagen, fahre fort..."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:708
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:793
 #, python-format
 msgid "Copying %(filename)s failed: %(error)s"
 msgstr "Kopieren von %(filename)s fehlgeschlagen: %(error)s"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:724
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:809
 msgid "Moving"
 msgstr "Verschiebe"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:725
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:810
 #, python-format
 msgid "Moving %%(count)d items to %(destination)s..."
 msgstr "Verschiebe %%(count)d Objekte nach %(destination)s..."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:728
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:813
 #, python-format
 msgid "Moved %(filename)s..."
 msgstr "%(filename)s verschoben..."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:729
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:814
 #, python-format
 msgid "Moving %(filename)s failed, continuing..."
 msgstr "Verschieben von %(filename)s fehlgeschlagen, fahre fort..."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:730
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:815
 #, python-format
 msgid "Moving %(filename)s failed: %(error)s"
 msgstr "Verschieben von %(filename)s fehlgeschlagen: %(error)s"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:745
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:830
 #, python-format
 msgid "You are about to delete %(count)d items forever."
 msgstr "Du bist im Begriff %(count)d Objekte für immer zu löschen."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:751
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:836
 #: src/octoprint/static/js/app/viewmodels/files.js:693
 #, python-format
 msgid ""
@@ -5717,17 +5762,17 @@ msgstr ""
 "Du bist im Begriff das Verzeichnis \"%(folder)s\" für immer zu löschen, "
 "das noch Dateien und/oder Unterverzeichnisse enthält."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:759
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:844
 #: src/octoprint/static/js/app/viewmodels/files.js:827
 #, python-format
 msgid "You are about to delete \"%(file)s\" forever."
 msgstr "Du bist im Begriff, \"%(file)s\" für immer zu löschen."
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:770
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:855
 msgid "Deleting"
 msgstr "Lösche"
 
-#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:771
+#: src/octoprint/plugins/uploadmanager/static/js/uploadmanager.js:856
 #, python-format
 msgid "Deleting %(count)d items..."
 msgstr "Lösche %(count)d Objekte..."
@@ -6403,94 +6448,94 @@ msgstr "Bitte gib einen neuen Wert ein:"
 msgid "Progress"
 msgstr "Fortschritt"
 
-#: src/octoprint/static/js/app/main.js:198
+#: src/octoprint/static/js/app/main.js:206
 msgid "Reloading..."
 msgstr "Lade neu..."
 
-#: src/octoprint/static/js/app/main.js:277
+#: src/octoprint/static/js/app/main.js:285
 msgid "Offline"
 msgstr "Offline"
 
-#: src/octoprint/static/js/app/main.js:278
+#: src/octoprint/static/js/app/main.js:286
 msgid "Offline after error"
 msgstr "Offline nach Fehler"
 
-#: src/octoprint/static/js/app/main.js:279
+#: src/octoprint/static/js/app/main.js:287
 #: src/octoprint/static/js/app/viewmodels/system.js:152
 msgid "Error"
 msgstr "Fehler"
 
-#: src/octoprint/static/js/app/main.js:280
+#: src/octoprint/static/js/app/main.js:288
 msgid "Opening serial connection"
 msgstr "Öffne serielle Verbindung"
 
-#: src/octoprint/static/js/app/main.js:281
+#: src/octoprint/static/js/app/main.js:289
 msgid "Detecting serial connection"
 msgstr "Detektiere serielle Verbindung"
 
-#: src/octoprint/static/js/app/main.js:282
+#: src/octoprint/static/js/app/main.js:290
 msgid "Connecting"
 msgstr "Verbinde"
 
-#: src/octoprint/static/js/app/main.js:283
+#: src/octoprint/static/js/app/main.js:291
 msgid "Operational"
 msgstr "Bereit"
 
-#: src/octoprint/static/js/app/main.js:284
+#: src/octoprint/static/js/app/main.js:292
 msgid "Starting"
 msgstr "Starte"
 
-#: src/octoprint/static/js/app/main.js:285
+#: src/octoprint/static/js/app/main.js:293
 msgid "Starting print from SD"
 msgstr "Starte Druck von SD"
 
-#: src/octoprint/static/js/app/main.js:286
+#: src/octoprint/static/js/app/main.js:294
 msgid "Starting to send file to SD"
 msgstr "Starte Dateitransfer zu SD"
 
-#: src/octoprint/static/js/app/main.js:287
+#: src/octoprint/static/js/app/main.js:295
 msgid "Printing from SD"
 msgstr "Drucke von SD"
 
-#: src/octoprint/static/js/app/main.js:288
+#: src/octoprint/static/js/app/main.js:296
 msgid "Sending file to SD"
 msgstr "Sende Datei zu SD"
 
-#: src/octoprint/static/js/app/main.js:289
+#: src/octoprint/static/js/app/main.js:297
 msgid "Printing"
 msgstr "Drucke"
 
-#: src/octoprint/static/js/app/main.js:290
+#: src/octoprint/static/js/app/main.js:298
 msgid "Paused"
 msgstr "Pausiert"
 
-#: src/octoprint/static/js/app/main.js:291
+#: src/octoprint/static/js/app/main.js:299
 msgid "Closed"
 msgstr "Geschlossen"
 
-#: src/octoprint/static/js/app/main.js:292
+#: src/octoprint/static/js/app/main.js:300
 msgid "Transferring file to SD"
 msgstr "Sende Datei zu SD"
 
-#: src/octoprint/static/js/app/main.js:293
+#: src/octoprint/static/js/app/main.js:301
 #: src/octoprint/templates/dialogs/settings/serialconnection.jinja2:576
 msgid "Pausing"
 msgstr "Pausiere"
 
-#: src/octoprint/static/js/app/main.js:294
+#: src/octoprint/static/js/app/main.js:302
 msgid "Resuming"
 msgstr "Setze fort"
 
-#: src/octoprint/static/js/app/main.js:295
+#: src/octoprint/static/js/app/main.js:303
 #: src/octoprint/templates/dialogs/settings/serialconnection.jinja2:585
 msgid "Cancelling"
 msgstr "Breche ab"
 
-#: src/octoprint/static/js/app/main.js:296
+#: src/octoprint/static/js/app/main.js:304
 msgid "Finishing"
 msgstr "Beende"
 
-#: src/octoprint/static/js/app/main.js:1101
+#: src/octoprint/static/js/app/main.js:1109
 msgid "Loading OctoPrint's UI, please wait..."
 msgstr "Lade OctoPrints Userinterface, bitte warten..."
 
@@ -10215,10 +10260,6 @@ msgstr "Verschieben oder Umbenennen"
 #: src/octoprint/templates/sidebar/files.jinja2:61
 msgid "Free"
 msgstr "Frei"
-
-#: src/octoprint/templates/sidebar/files.jinja2:61
-msgid "Total"
-msgstr "Gesamt"
 
 #: src/octoprint/templates/sidebar/files.jinja2:66
 msgid "Create folder..."
