@@ -564,6 +564,9 @@ class MachineCom:
         self._toolBeforeChange = None
         self._toolBeforeHeatup = None
 
+        self._relativeAxesRequested = False
+        self._relativeExtruderRequested = False
+
         self._known_invalid_tools = set()
         self._known_invalid_custom_temps = set()
         self._known_broken_temperature_hooks = set()
@@ -1346,6 +1349,8 @@ class MachineCom:
                 "last_position": self.last_position,
                 "last_temperature": self.last_temperature.as_script_dict(),
                 "last_fanspeed": self.last_fanspeed,
+                "relative_axes_requested": self._relativeAxesRequested,
+                "relative_extruder_requested": self._relativeExtruderRequested,
             }
         )
 
@@ -5611,6 +5616,26 @@ class MachineCom:
 
         self._timeout = self._get_new_communication_timeout() + _timeout
         self._dwelling_until = time.monotonic() + _timeout
+
+    def _gcode_G90_sent(
+        self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs
+    ):
+        self._relativeAxesRequested = False
+
+    def _gcode_G91_sent(
+        self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs
+    ):
+        self._relativeAxesRequested = True
+
+    def _gcode_M82_sent(
+        self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs
+    ):
+        self._relativeExtruderRequested = False
+
+    def _gcode_M83_sent(
+        self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs
+    ):
+        self._relativeExtruderRequested = True
 
     def _gcode_M106_sent(
         self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs
