@@ -21,9 +21,10 @@ These use cases are **permitted** when making a contribution with the help of AI
     - Generating repeated lines with minor variations (this should only be used for short code snippets where deduplication would add more complexity, compared to having almost the same code in multiple places)
     - Formatting code for consistency and readability
     - Completing code segments based on established patterns
-    - Drafting documentation for project components with which the contributor is already familiar
 
 AI-generated code that has undergone extensive human editing may be accepted, provided you (1) fully understand the AI's initial output, (2) can debug any issues independently (with or without further AI assistance), and (3) are prepared to discuss it directly with human reviewers.
+
+AI-generated documentation will **not** be accepted.
 
 **All AI usage requires explicit disclosure**, except in these cases:
 
