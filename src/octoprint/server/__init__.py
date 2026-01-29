@@ -1908,16 +1908,6 @@ class Server:
     ):
         from concurrent.futures import ThreadPoolExecutor
 
-        def mime_type_guesser(path):
-            from octoprint.filemanager import get_mime_type
-
-            return get_mime_type(path)
-
-        def download_name_generator(path):
-            metadata = fileManager.get_metadata("local", path)
-            if metadata and "display" in metadata:
-                return metadata["display"]
-
         download_handler_kwargs = {"as_attachment": True, "allow_client_caching": False}
 
         ##~~ Permission validators
