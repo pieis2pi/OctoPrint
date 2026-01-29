@@ -207,7 +207,9 @@
                             <td class="icon">
                                 <i class="icon-arrow-left"></i>
                             </td>
-                            <td data-bind="click: $root.navigateUp" colspan="4">{{ _("Back") }}</td>
+                            <td data-bind="click: $root.navigateUp" colspan="4">
+                                {{ _("Back") }} <small class="muted">{{ _("Currently in") }} <span data-bind="text: currentPath"></span></small>
+                            </td>
                         </tr>
                         <!-- /ko -->
 
