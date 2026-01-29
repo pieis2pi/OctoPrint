@@ -284,10 +284,26 @@
         <form class="form-vertical" action="javascript:void(0)">
             <div class="control-group">
                 <label class="control-label">
-                    {{ _("Select the destination folder") }} ({{ _("Currently:") }} <span data-id="source"></span>)
+                    {{ _("Select the destination storage") }} ({{ _("Currently:") }} <span data-id="sourceStorage"></span>)
                 </label>
                 <div class="controls">
-                    <select data-id="select" class="input-block-level" required></select>
+                    <select data-id="selectStorage" class="input-block-level" required></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">
+                    {{ _("Select the destination folder") }} ({{ _("Currently:") }} <span data-id="sourcePath"></span>)
+                </label>
+                <div class="controls">
+                    <select data-id="selectPath" class="input-block-level" required></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <label class="checkbox">
+                        <input data-id="allowOverwrite" type="checkbox" class="checkbox">
+                        {{ _("Allow overwriting target") }}
+                    </label>
                 </div>
             </div>
         </form>

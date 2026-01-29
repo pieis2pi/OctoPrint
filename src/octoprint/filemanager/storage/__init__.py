@@ -488,11 +488,12 @@ class StorageInterface:
         """
         raise NotImplementedError()
 
-    def get_metadata(self, path):
+    def get_metadata(self, path, default=None):
         """
         Retrieves the metadata for the file ``path``.
 
         :param path: virtual path to the file for which to retrieve the metadata
+        :param default: default value to return if there is no associated metadata
         :return: the metadata associated with the file
         """
         raise NotImplementedError()

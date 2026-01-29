@@ -368,7 +368,7 @@ class PrinterFileStorage(StorageInterface):
 
         try:
             remote = self._connection.upload_printer_file(
-                temp.name, path, upload_callback=callback
+                temp.name, path, progress_callback=callback
             )
             self._update_last_activity()
             return remote
@@ -445,12 +445,15 @@ class PrinterFileStorage(StorageInterface):
         metadata = self.get_metadata(path)
         return metadata and metadata.analysis
 
-    def get_metadata(self, path):
+    def get_metadata(self, path, default=None):
         if not self.capabilities.metadata:
             return None
 
         metadata = self._connection.get_printer_file_metadata(path)
-        return metadata.model_dump()
+        if metadata:
+            return metadata.model_dump()
+        else:
+            return default
 
     def has_thumbnail(self, path) -> bool:
         return self._connection.has_thumbnail(path)
@@ -524,10 +527,7 @@ class PrinterFileStorage(StorageInterface):
         return job
 
     def _strip_leading_slash(self, path: str) -> str:
-        if not path:
-            return path
-
-        while path[0] == "/":
+        while path and path[0] == "/":
             path = path[1:]
 
         return path

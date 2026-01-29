@@ -781,9 +781,9 @@ class LocalFileStorage(StorageInterface):
         metadata = self.get_metadata(path)
         return metadata and "analysis" in metadata
 
-    def get_metadata(self, path):
+    def get_metadata(self, path, default=None):
         path, name = self.sanitize(path)
-        return self._get_metadata_entry(path, name)
+        return self._get_metadata_entry(path, name, default=default)
 
     def add_history(self, path, data):
         path, name = self.sanitize(path)

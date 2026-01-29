@@ -984,8 +984,6 @@ def gcodeFileCommand(storage, path):
             "analyse": [],
             "copy": ["destination"],
             "move": ["destination"],
-            "copy_storage": ["storage", "destination"],
-            "move_storage": ["storage", "destination"],
             "uploadSd": [],
         }
 
@@ -994,11 +992,11 @@ def gcodeFileCommand(storage, path):
             return response
 
         if command == "uploadSd":
-            command = "copy_storage"
+            command = "copy"
             data["storage"] = "printer"
             data["destination"] = path
             _logger.warning(
-                "File command 'uploadSD' is outdated, use 'copy_storage' with storage 'printer' instead"
+                "File command 'uploadSD' is outdated, use 'copy' with storage 'printer' instead"
             )
 
         user = current_user.get_name()
@@ -1264,48 +1262,12 @@ def gcodeFileCommand(storage, path):
 
         elif command == "copy" or command == "move":
             with Permissions.FILES_UPLOAD.require(403):
+                allow_overwrite = data.get("allow_overwrite") in valid_boolean_trues
+
                 if not _verifyFileExists(storage, path) and not _verifyFolderExists(
                     storage, path
                 ):
                     abort(404)
-
-                _, name = fileManager.split_path(storage, path)
-                sanitized_source = fileManager.path_in_storage(storage, path)
-
-                destination = data["destination"]
-                dst_path, dst_name = fileManager.split_path(storage, destination)
-                sanitized_destination = fileManager.join_path(
-                    storage, dst_path, fileManager.sanitize_name(storage, dst_name)
-                )
-
-                # Check for exception thrown by _verifyFolderExists, if outside the root directory
-                try:
-                    if (
-                        _verifyFolderExists(storage, destination)
-                        and sanitized_destination != sanitized_source
-                    ):
-                        # destination is an existing folder and not ourselves (= display rename), we'll assume we are supposed
-                        # to move filename to this folder under the same name
-                        destination = fileManager.join_path(storage, destination, name)
-
-                    if (
-                        _verifyFileExists(storage, destination)
-                        or _verifyFolderExists(storage, destination)
-                    ) and sanitized_destination != sanitized_source:
-                        # destination exists and is not the same item as source,
-                        # we don't support overwriting move/rename
-                        abort(409, description="File or folder does already exist")
-
-                    # if we get here, internal source and destination might still be identical, but we might want to
-                    # do a display rename, which the storages should support...
-
-                except HTTPException:
-                    raise
-                except Exception:
-                    abort(
-                        409,
-                        description="Exception thrown by storage, bad folder/file name?",
-                    )
 
                 is_file = fileManager.file_exists(storage, path)
                 is_folder = fileManager.folder_exists(storage, path)
@@ -1313,143 +1275,56 @@ def gcodeFileCommand(storage, path):
                 if not (is_file or is_folder):
                     abort(400, description=f"Neither file nor folder, can't {command}")
 
-                try:
-                    if command == "copy":
-                        if (
-                            is_file and not fileManager.capabilities(storage).copy_file
-                        ) or (
-                            is_folder
-                            and not fileManager.capabilities(storage).copy_folder
-                        ):
-                            abort(
-                                400, description="Storage does not support this operation"
-                            )
+                dst_storage = data.get(
+                    "storage", storage
+                )  # if this is not the same as storage, this is a cross-storage operation
 
-                        # destination already there? error...
-                        if _verifyFileExists(storage, destination) or _verifyFolderExists(
-                            storage, destination
-                        ):
-                            abort(409, description="File or folder does already exist")
-
-                        if is_file:
-                            fileManager.copy_file(storage, path, destination)
-                        else:
-                            fileManager.copy_folder(storage, path, destination)
-
-                    elif command == "move":
-                        with Permissions.FILES_DELETE.require(403):
-                            if _isBusy(storage, path):
-                                abort(
-                                    409,
-                                    description="Trying to move a file or folder that is currently in use",
-                                )
-
-                            # destination already there AND not ourselves (= display rename)? error...
-                            if (
-                                _verifyFileExists(storage, destination)
-                                or _verifyFolderExists(storage, destination)
-                            ) and sanitized_destination != path:
-                                abort(
-                                    409, description="File or folder does already exist"
-                                )
-
-                            if (
-                                is_file
-                                and not fileManager.capabilities(storage).move_file
-                            ) or (
-                                is_folder
-                                and not fileManager.capabilities(storage).move_folder
-                            ):
-                                abort(
-                                    400,
-                                    description="Storage does not support this operation",
-                                )
-
-                            # deselect the file if it's currently selected
-                            currentOrigin, currentFilename = _getCurrentFile()
-                            if (
-                                currentOrigin is not None
-                                and currentOrigin == storage
-                                and currentFilename is not None
-                                and path == currentFilename
-                            ):
-                                printer.set_job(None)
-
-                            if is_file:
-                                fileManager.move_file(storage, path, destination)
-                            else:
-                                fileManager.move_folder(storage, path, destination)
-
-                except octoprint.filemanager.storage.StorageError as e:
-                    if e.code == octoprint.filemanager.storage.StorageError.INVALID_FILE:
+                if storage == dst_storage:
+                    # general in-storage checks
+                    capability = getattr(
+                        fileManager.capabilities(storage),
+                        f"{command}_{'file' if is_file else 'folder'}",
+                        False,
+                    )
+                    if not capability:
                         abort(
-                            415,
-                            description=f"Could not {command} {path} to {destination}, invalid type",
+                            400,
+                            description=f"Storage {storage} does not support this operation",
                         )
-                    else:
+                else:
+                    # general cross-storage checks
+                    if dst_storage not in fileManager.registered_storages:
+                        abort(400, f"Target storage {dst_storage} is not available")
+
+                    if not is_file:
                         abort(
-                            500,
-                            description=f"Could not {command} {path} to {destination}, unknown error",
+                            400,
+                            description=f"cross-storage {command} is only supported for files",
                         )
 
-                location = url_for(
-                    ".readGcodeFile",
-                    target=storage,
-                    filename=destination,
-                    _external=True,
-                )
-                result = {
-                    "name": name,
-                    "path": destination,
-                    "origin": storage,
-                    "refs": {"resource": location},
-                }
-                if is_file and fileManager.capabilities(storage).read_file:
-                    result["refs"]["download"] = (
-                        url_for("index", _external=True)
-                        + "downloads/files/"
-                        + storage
-                        + "/"
-                        + urlquote(destination)
-                    )
+                    if not fileManager.capabilities(storage).read_file or (
+                        command == "move"
+                        and not fileManager.capabilities(storage).remove_file
+                    ):
+                        abort(
+                            400,
+                            description=f"Source storage {storage} does not support this operation",
+                        )
 
-                r = make_response(jsonify(result), 201)
-                r.headers["Location"] = location
-                return r
-
-        elif command == "copy_storage" or command == "move_storage":
-            with Permissions.FILES_UPLOAD.require(403):
-                if not fileManager.file_exists(storage, path):
-                    abort(400, description=f"{command} is only supported for files")
-
-                if not _verifyFileExists(storage, path) and not _verifyFolderExists(
-                    storage, path
-                ):
-                    abort(404)
-
-                if not fileManager.capabilities(storage).read_file or (
-                    command == "move_storage"
-                    and not fileManager.capabilities(storage).remove_file
-                ):
-                    abort(
-                        400,
-                        description=f"Storage {storage} does not support this operation",
-                    )
-
-                dst_storage = data["storage"]
-                if dst_storage not in fileManager.registered_storages:
-                    abort(400, f"Target storage {dst_storage} is not available")
-
-                if not fileManager.capabilities(dst_storage).write_file:
-                    abort(
-                        400,
-                        description=f"Target storage {dst_storage} does not support this operation",
-                    )
+                    if not fileManager.capabilities(dst_storage).write_file:
+                        abort(
+                            400,
+                            description=f"Target storage {dst_storage} does not support this operation",
+                        )
 
                 _, name = fileManager.split_path(storage, path)
 
+                sanitized_source = fileManager.path_in_storage(storage, path)
+
                 destination = data["destination"]
                 dst_path, dst_name = fileManager.split_path(dst_storage, destination)
+                if not dst_name:
+                    dst_name = name
                 sanitized_destination = fileManager.join_path(
                     dst_storage,
                     dst_path,
@@ -1459,19 +1334,32 @@ def gcodeFileCommand(storage, path):
                 # Check for exception thrown by _verifyFolderExists, if outside the root directory
                 try:
                     if (
-                        _verifyFolderExists(dst_storage, destination)
-                        and sanitized_destination != path
+                        _verifyFolderExists(dst_storage, sanitized_destination)
+                        and sanitized_destination != sanitized_source
                     ):
                         # destination is an existing folder and not ourselves (= display rename), we'll assume we are supposed
                         # to move filename to this folder under the same name
-                        destination = fileManager.join_path(
+                        sanitized_destination = fileManager.join_path(
                             dst_storage, destination, name
                         )
 
-                    if _verifyFileExists(dst_storage, destination) or _verifyFolderExists(
-                        dst_storage, destination
+                    if (
+                        (
+                            _verifyFileExists(dst_storage, sanitized_destination)
+                            or _verifyFolderExists(dst_storage, sanitized_destination)
+                        )
+                        and (
+                            (dst_storage != storage)
+                            or (sanitized_destination != sanitized_source)
+                        )  # allow rename, but only in-storage
+                        and not allow_overwrite
                     ):
+                        # destination exists and is not the same item as source,
+                        # we don't support overwriting move/rename
                         abort(409, description="File or folder does already exist")
+
+                    # if we get here, internal source and destination might still be identical, but we might want to
+                    # do a display rename, which the storages should support...
 
                 except HTTPException:
                     raise
@@ -1488,40 +1376,39 @@ def gcodeFileCommand(storage, path):
                     upload_done = done or failed
 
                 try:
-                    if command == "copy_storage":
-                        if not fileManager.capabilities(dst_storage).write_file:
-                            abort(
-                                400, description="Storage does not support this operation"
+                    if command == "copy":
+                        if dst_storage == storage:
+                            if is_file:
+                                fileManager.copy_file(
+                                    storage,
+                                    path,
+                                    destination,
+                                    allow_overwrite=allow_overwrite,
+                                )
+                            else:
+                                fileManager.copy_folder(
+                                    storage,
+                                    path,
+                                    destination,
+                                    allow_overwrite=allow_overwrite,
+                                )
+
+                        else:
+                            fileManager.copy_file_across_storage(
+                                storage,
+                                path,
+                                dst_storage,
+                                sanitized_destination,
+                                allow_overwrite=allow_overwrite,
+                                progress_callback=progress_callback,
                             )
 
-                        # destination already there? error...
-                        if _verifyFileExists(
-                            dst_storage, destination
-                        ) or _verifyFolderExists(dst_storage, destination):
-                            abort(409, description="File or folder does already exist")
-
-                        fileManager.copy_file_across_storage(
-                            storage,
-                            path,
-                            dst_storage,
-                            destination,
-                            progress_callback=progress_callback,
-                        )
-
-                    elif command == "move_storage":
+                    elif command == "move":
                         with Permissions.FILES_DELETE.require(403):
                             if _isBusy(storage, path):
                                 abort(
                                     409,
                                     description="Trying to move a file or folder that is currently in use",
-                                )
-
-                            # destination already there? error...
-                            if _verifyFileExists(
-                                dst_storage, destination
-                            ) or _verifyFolderExists(dst_storage, destination):
-                                abort(
-                                    409, description="File or folder does already exist"
                                 )
 
                             # deselect the file if it's currently selected
@@ -1534,55 +1421,69 @@ def gcodeFileCommand(storage, path):
                             ):
                                 printer.set_job(None)
 
-                            fileManager.move_file_across_storage(
-                                storage,
-                                path,
-                                dst_storage,
-                                destination,
-                                progress_callback=progress_callback,
-                            )
+                            if dst_storage == storage:
+                                if is_file:
+                                    fileManager.move_file(
+                                        storage,
+                                        path,
+                                        destination,
+                                        allow_overwrite=allow_overwrite,
+                                    )
+                                else:
+                                    fileManager.move_folder(
+                                        storage,
+                                        path,
+                                        destination,
+                                        allow_overwrite=allow_overwrite,
+                                    )
+                            else:
+                                fileManager.move_file_across_storage(
+                                    storage,
+                                    path,
+                                    dst_storage,
+                                    sanitized_destination,
+                                    allow_overwrite=allow_overwrite,
+                                    progress_callback=progress_callback,
+                                )
 
                 except octoprint.filemanager.storage.StorageError as e:
-                    if e.code == octoprint.filemanager.storage.StorageError.UNSUPPORTED:
+                    if e.code == octoprint.filemanager.storage.StorageError.INVALID_FILE:
                         abort(
                             415,
-                            description=f"Could not {command} {storage}:{path} to {dst_storage}:{destination}, unsupported",
-                        )
-                    elif (
-                        e.code == octoprint.filemanager.storage.StorageError.INVALID_FILE
-                    ):
-                        abort(
-                            415,
-                            description=f"Could not {command} {storage}:{path} to {dst_storage}:{destination}, invalid type",
+                            description=f"Could not {command} {path} to {destination}, invalid type",
                         )
                     else:
                         abort(
                             500,
-                            description=f"Could not {command} {storage}:{path} to {dst_storage}:{destination}, unknown error",
+                            description=f"Could not {command} {path} to {destination}, unknown error",
                         )
 
                 location = url_for(
                     ".readGcodeFile",
                     target=dst_storage,
-                    filename=destination,
+                    filename=sanitized_destination,
                     _external=True,
                 )
                 result = {
-                    "name": dst_name,
-                    "path": dst_path,
+                    "name": name,
+                    "path": sanitized_destination,
                     "origin": dst_storage,
                     "done": upload_done,
                     "refs": {"resource": location},
                 }
-                if fileManager.capabilities(dst_storage).read_file:
+                if is_file and fileManager.capabilities(dst_storage).read_file:
                     result["refs"]["download"] = (
                         url_for("index", _external=True)
-                        + f"downloads/files/{dst_storage}/{urlquote(destination)}"
+                        + "downloads/files/"
+                        + dst_storage
+                        + "/"
+                        + urlquote(sanitized_destination)
                     )
 
                 r = make_response(jsonify(result), 201)
                 r.headers["Location"] = location
                 return r
+
     except octoprint.filemanager.NoSuchStorage:
         abort(404)
 
