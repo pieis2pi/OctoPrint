@@ -125,13 +125,14 @@ $(function () {
         exports.browser.mobile = $.browser.mobile;
         exports.browser.desktop = !exports.browser.mobile;
 
-        var uap = UAParser();
+        var uap = UAParser(); // heads-up, all of these may be undefined! See #5235
         exports.browser.browser_name = uap.browser.name;
         exports.browser.browser_version = uap.browser.version;
         exports.browser.os_name = uap.os.name;
         exports.browser.os_version = uap.os.version;
 
-        exports.browser.is_mac = ["macos", "mac os"].includes(uap.os.name.toLowerCase());
+        exports.browser.is_mac =
+            uap.os.name && ["macos", "mac os"].includes(uap.os.name.toLowerCase()); // apparently uap.os.name can be undefined, see #5235
 
         if (exports.browser.safari) {
             $("html").addClass("safari");
