@@ -59,6 +59,8 @@ REAUTHED_SETTINGS = {
     "system": {"actions": True},
 }
 
+SETTINGS_API_VERSION = 1
+
 
 def _lastmodified():
     return settings().last_modified
@@ -108,6 +110,9 @@ def _etag(lm=None):
 
     # or if the user reauthenticates
     hash_update(repr(credentials_checked_recently()))
+
+    # also if the settings api version changes
+    hash_update(str(SETTINGS_API_VERSION))
 
     return hash.hexdigest()
 
@@ -340,6 +345,9 @@ def getSettings():
             "autologinHeadsupAcknowledged": s.getBoolean(
                 ["accessControl", "autologinHeadsupAcknowledged"]
             ),
+            "defaultReauthenticationTimeout": s.getInt(
+                ["accessControl", "defaultReauthenticationTimeout"]
+            ),
         }
 
     return jsonify(data)
@@ -532,6 +540,12 @@ def _saveSettings(data):
             s.setBoolean(
                 ["accessControl", "autologinHeadsupAcknowledged"],
                 data["accessControl"]["autologinHeadsupAcknowledged"],
+            )
+        if "defaultReauthenticationTimeout" in data["accessControl"]:
+            s.setInt(
+                ["accessControl", "defaultReauthenticationTimeout"],
+                data["accessControl"]["defaultReauthenticationTimeout"],
+                min=0,
             )
 
     if "appearance" in data:
