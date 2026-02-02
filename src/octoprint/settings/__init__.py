@@ -1236,6 +1236,7 @@ class Settings:
             self._migrate_blocked_commands,
             self._migrate_gcodeviewer_enabled,
             self._migrate_trusted_proxies,
+            self._migrate_allowlists_and_blocklists,
         )
 
         for migrate in migrators:
@@ -1773,6 +1774,29 @@ class Settings:
             backup_path = self.backup("trusted_proxies_migration")
             self._logger.info(
                 f"Made a copy of the current config at {backup_path} to allow recovery of trusted downstream configuration"
+            )
+
+        return modified
+
+    def _migrate_allowlists_and_blocklists(self, config):
+        modified = False
+
+        if "feature" in config and "autoUppercaseBlacklist" in config["feature"]:
+            config["feature"]["autoUppercaseBlocklist"] = config["feature"][
+                "autoUppercaseBlacklist"
+            ]
+            del config["feature"]["autoUppercaseBlacklist"]
+            modified = True
+
+        if "server" in config and "pluginBlacklist" in config["server"]:
+            config["server"]["pluginBlocklist"] = config["server"]["pluginBlacklist"]
+            del config["server"]["pluginBlacklist"]
+            modified = True
+
+        if modified:
+            backup_path = self.backup("allowlist_blocklist_migration")
+            self._logger.info(
+                f"Made a copy of the current config at {backup_path} to allow recovery of allowlist/blocklist configuration"
             )
 
         return modified
