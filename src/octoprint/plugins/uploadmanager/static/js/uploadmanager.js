@@ -1148,12 +1148,19 @@ $(function () {
                 const request = handler(file);
                 requests.push(request);
             });
-            $.when.apply($, _.map(requests, wrapPromiseWithAlways)).done(() => {
+
+            const finish = () => {
                 self.files.ignoreUpdatedFilesEvent = false;
                 deferred.resolve();
                 self.deselectAll();
                 self.files.requestData();
-            });
+            };
+
+            if (requests.length == 1) {
+                requests[0].always(finish);
+            } else {
+                $.when.apply($, _.map(requests, wrapPromiseWithAlways)).done(finish);
+            }
 
             return promise;
         };
