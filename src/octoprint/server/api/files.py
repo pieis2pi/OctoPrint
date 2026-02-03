@@ -1382,14 +1382,14 @@ def gcodeFileCommand(storage, path):
                                 fileManager.copy_file(
                                     storage,
                                     path,
-                                    destination,
+                                    sanitized_destination,
                                     allow_overwrite=allow_overwrite,
                                 )
                             else:
                                 fileManager.copy_folder(
                                     storage,
                                     path,
-                                    destination,
+                                    sanitized_destination,
                                     allow_overwrite=allow_overwrite,
                                 )
 
@@ -1426,14 +1426,14 @@ def gcodeFileCommand(storage, path):
                                     fileManager.move_file(
                                         storage,
                                         path,
-                                        destination,
+                                        sanitized_destination,
                                         allow_overwrite=allow_overwrite,
                                     )
                                 else:
                                     fileManager.move_folder(
                                         storage,
                                         path,
-                                        destination,
+                                        sanitized_destination,
                                         allow_overwrite=allow_overwrite,
                                     )
                             else:
