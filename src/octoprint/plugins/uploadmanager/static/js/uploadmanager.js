@@ -936,7 +936,12 @@ $(function () {
             self._bulkAction(
                 (file) => {
                     if (file.origin === storage) {
-                        return OctoPrint.files.copy(file.origin, file.path, destination);
+                        return OctoPrint.files.copy(
+                            file.origin,
+                            file.path,
+                            destination + "/",
+                            allowOverwrite
+                        );
                     } else {
                         return OctoPrint.files.copyAcrossStorage(
                             file.origin,
@@ -987,7 +992,12 @@ $(function () {
             self._bulkAction(
                 (file) => {
                     if (file.origin === storage) {
-                        return OctoPrint.files.move(file.origin, file.path, destination);
+                        return OctoPrint.files.move(
+                            file.origin,
+                            file.path,
+                            destination + "/",
+                            allowOverwrite
+                        );
                     } else {
                         return OctoPrint.files.moveAcrossStorage(
                             file.origin,
